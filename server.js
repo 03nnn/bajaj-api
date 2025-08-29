@@ -92,5 +92,5 @@ app.get('/', (_req, res) => {
   });
 });
 
-// Export a serverless handler for Vercel (do NOT call app.listen on Vercel)
-module.exports = (req, res) => app(req, res);
+// Export a serverless handler for Vercel
+module.exports = app; 

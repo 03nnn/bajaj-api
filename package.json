@@ -8,7 +8,7 @@
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
-  "author": "",
+  "author": "nishchal_03nnn",
   "license": "ISC",
   "description": "API for Bajaj Finserv Backend Challenge",
   "dependencies": {

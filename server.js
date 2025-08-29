@@ -40,10 +40,10 @@ app.post('/bfhl', (req, res) => {
       return res.status(400).json({ is_success: false, error: "Invalid input: 'data' must be an array" });
     }
 
-    const oddNumbers = [];
-    const evenNumbers = [];
+    const odd_numbers = [];
+    const even_numbers = [];
     const alphabets = [];
-    const specialCharacters = [];
+    const special_characters = [];
     let sum = 0;
 
     for (const item of data) {
@@ -51,31 +51,31 @@ app.post('/bfhl', (req, res) => {
       if (isNumber(s)) {
         const n = parseInt(s);
         sum += n;
-        (n % 2 === 0 ? evenNumbers : oddNumbers).push(s);
+        (n % 2 === 0 ? even_numbers : odd_numbers).push(s);
       } else if (s.length === 1 && isAlphabetic(s)) {
         alphabets.push(s.toUpperCase());
       } else if (s.length > 1) {
         let allAlpha = true;
         for (const ch of s) if (!isAlphabetic(ch)) { allAlpha = false; break; }
-        allAlpha ? alphabets.push(s.toUpperCase()) : specialCharacters.push(s);
+        allAlpha ? alphabets.push(s.toUpperCase()) : special_characters.push(s);
       } else if (isSpecialCharacter(s)) {
-        specialCharacters.push(s);
+        special_characters.push(s);
       }
     }
 
-    const concatString = createConcatString(alphabets);
+    const concat_string = createConcatString(alphabets);
 
     return res.status(200).json({
       is_success: true,
       user_id: process.env.USER_ID || "nishchal_naithani_03052004",
       email: process.env.EMAIL || "nishchal.22bce8449@vitapstudent.ac.in",
       roll_number: process.env.ROLL_NUMBER || "22BCE8449",
-      odd_numbers: oddNumbers,
-      even_numbers: evenNumbers,
+      odd_numbers,
+      even_numbers,
       alphabets,
-      special_characters: specialCharacters,
+      special_characters,
       sum: String(sum),
-      concat_string: concatString
+      concat_string
     });
   } catch {
     return res.status(500).json({ is_success: false, error: "Internal server error" });
@@ -92,4 +92,5 @@ app.get('/', (_req, res) => {
   });
 });
 
+// Export a serverless handler for Vercel (do NOT call app.listen on Vercel)
 module.exports = (req, res) => app(req, res);

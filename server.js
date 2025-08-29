@@ -1,4 +1,3 @@
-require('dotenv').config();
 const express = require('express');
 const app = express();
 
@@ -6,17 +5,16 @@ const app = express();
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// CORS middleware for cross-origin requests
+// CORS headers
 app.use((req, res, next) => {
     res.header('Access-Control-Allow-Origin', '*');
     res.header('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
-    res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept');
+    res.header('Access-Control-Allow-Headers', 'Content-Type');
     
     if (req.method === 'OPTIONS') {
-        res.sendStatus(200);
-    } else {
-        next();
+        return res.sendStatus(200);
     }
+    next();
 });
 
 // Helper functions
@@ -56,7 +54,7 @@ function createConcatString(alphabets) {
     return result;
 }
 
-// POST /bfhl endpoint
+// Routes
 app.post('/bfhl', (req, res) => {
     try {
         const { data } = req.body;
@@ -131,31 +129,20 @@ app.post('/bfhl', (req, res) => {
     }
 });
 
-// GET /bfhl endpoint (health check)
 app.get('/bfhl', (req, res) => {
-    res.status(200).json({ 
-        operation_code: 1 
-    });
+    res.status(200).json({ operation_code: 1 });
 });
 
-// Root endpoint
 app.get('/', (req, res) => {
     res.json({
         message: "BFHL API is running",
+        status: "active",
         endpoints: {
-            "GET /bfhl": "Health check - returns operation_code: 1",
-            "POST /bfhl": "Process data array according to VIT requirements"
+            "GET /bfhl": "Health check",
+            "POST /bfhl": "Process data array"
         }
     });
 });
 
-// Export for Vercel
+// Export the Express API
 module.exports = app;
-
-// Local development server (won't run on Vercel)
-if (require.main === module) {
-    const port = process.env.PORT || 3000;
-    app.listen(port, () => {
-        console.log(`Server running on port ${port}`);
-    });
-}

@@ -1,10 +1,25 @@
 require('dotenv').config();
 const express = require('express');
 const app = express();
-const port = process.env.PORT || 3000;
 
+// Middleware
 app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 
+// CORS middleware for cross-origin requests
+app.use((req, res, next) => {
+    res.header('Access-Control-Allow-Origin', '*');
+    res.header('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
+    res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept');
+    
+    if (req.method === 'OPTIONS') {
+        res.sendStatus(200);
+    } else {
+        next();
+    }
+});
+
+// Helper functions
 function isNumber(str) {
     return !isNaN(str) && !isNaN(parseFloat(str));
 }
@@ -26,7 +41,9 @@ function createConcatString(alphabets) {
             }
         }
     });
+    
     allChars.reverse();
+    
     let result = '';
     for (let i = 0; i < allChars.length; i++) {
         if (i % 2 === 0) {
@@ -35,28 +52,35 @@ function createConcatString(alphabets) {
             result += allChars[i].toLowerCase();
         }
     }
+    
     return result;
 }
 
+// POST /bfhl endpoint
 app.post('/bfhl', (req, res) => {
     try {
         const { data } = req.body;
+        
         if (!data || !Array.isArray(data)) {
             return res.status(400).json({
                 is_success: false,
                 error: "Invalid input: 'data' must be an array"
             });
         }
+
         const oddNumbers = [];
         const evenNumbers = [];
         const alphabets = [];
         const specialCharacters = [];
         let sum = 0;
+
         data.forEach(item => {
             const itemStr = String(item);
+            
             if (isNumber(itemStr)) {
                 const num = parseInt(itemStr);
                 sum += num;
+                
                 if (num % 2 === 0) {
                     evenNumbers.push(itemStr);
                 } else {
@@ -81,10 +105,12 @@ app.post('/bfhl', (req, res) => {
                 specialCharacters.push(itemStr);
             }
         });
+
         const concatString = createConcatString(alphabets);
+
         const response = {
             is_success: true,
-            user_id: process.env.USER_ID || "nishchal_naithani",
+            user_id: process.env.USER_ID || "nishchal_naithani_03052004",
             email: process.env.EMAIL || "nishchal.22bce8449@vitapstudent.ac.in",
             roll_number: process.env.ROLL_NUMBER || "22BCE8449",
             odd_numbers: oddNumbers,
@@ -94,7 +120,9 @@ app.post('/bfhl', (req, res) => {
             sum: sum.toString(),
             concat_string: concatString
         };
+
         res.status(200).json(response);
+
     } catch (error) {
         res.status(500).json({
             is_success: false,
@@ -103,12 +131,31 @@ app.post('/bfhl', (req, res) => {
     }
 });
 
+// GET /bfhl endpoint (health check)
 app.get('/bfhl', (req, res) => {
-    res.status(200).json({ operation_code: 1 });
+    res.status(200).json({ 
+        operation_code: 1 
+    });
 });
 
-app.listen(port, () => {
-    console.log(`Server running on port ${port}`);
+// Root endpoint
+app.get('/', (req, res) => {
+    res.json({
+        message: "BFHL API is running",
+        endpoints: {
+            "GET /bfhl": "Health check - returns operation_code: 1",
+            "POST /bfhl": "Process data array according to VIT requirements"
+        }
+    });
 });
 
+// Export for Vercel
 module.exports = app;
+
+// Local development server (won't run on Vercel)
+if (require.main === module) {
+    const port = process.env.PORT || 3000;
+    app.listen(port, () => {
+        console.log(`Server running on port ${port}`);
+    });
+}
